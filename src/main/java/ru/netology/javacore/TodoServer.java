@@ -36,21 +36,22 @@ public class TodoServer {
                     JsonElement element = JsonParser.parseString(reader.readLine());
                     JsonObject jsonObject = element.getAsJsonObject();
                     String type = jsonObject.get("type").getAsString();
-                    if (type.equals(Todos.TaskType.RESTORE.toString())) {
+                    if (type.equals("RESTORE")) {
                         undoOperation();
                         writer.println(todos.getAllTasks());
                         continue;
                     }
                     String task = jsonObject.get("task").getAsString();
-                    if (type.equals(Todos.TaskType.ADD.toString())) {
-                        todos.addTask(task);
-                        history.add(type + " " + task);
-                    } else if (type.equals(Todos.TaskType.REMOVE.toString())) {
-                        todos.removeTask(task);
-                        history.add(type + " " + task);
+                    switch (type) {
+                        case "ADD":
+                            todos.addTask(task);
+                            history.add(type + " " + task);
+                            break;
+                        case "REMOVE":
+                            todos.removeTask(task);
+                            history.add(type + " " + task);
                     }
                     writer.println(todos.getAllTasks());
-
                 }
             }
         } catch (Exception e) {
@@ -64,10 +65,12 @@ public class TodoServer {
             String[] lastOperation = history.get(history.size() - 1).split(" ");
             String type = lastOperation[0];
             String task = lastOperation[1];
-            if (type.equals(Todos.TaskType.ADD.toString())) {
-                todos.removeTask(task);
-            } else if (type.equals(Todos.TaskType.REMOVE.toString())) {
-                todos.addTask(task);
+            switch (type) {
+                case "ADD":
+                    todos.removeTask(task);
+                    break;
+                case "REMOVE":
+                    todos.addTask(task);
             }
             history.remove(history.size() - 1);
         }
